@@ -1,0 +1,57 @@
+{
+  "name": "vscode-selections-swap",
+  "version": "0.0.1",
+  "displayName": "Swap Selections",
+  "description": "This extension allows you to swap selections.",
+  "main": "./out/extension.js",
+  "author": "Taras Shashurin",
+  "publisher": "amurisavemylifee",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amurisavemylifee/vscode-selections-swap"
+  },
+  "engines": {
+    "vscode": "^1.88.0"
+  },
+  "license": "MIT",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/node": "20.2.5",
+    "@types/vscode": "^1.80.0",
+    "glob": "^8.1.0",
+    "typescript": "^5.1.3"
+  },
+  "keywords": [
+    "text",
+    "text swap",
+    "swap",
+    "string",
+    "selection"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-selections-swap.swap",
+        "title": "Swap selections"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "vscode-selections-swap.swap",
+        "mac": "CMD+5",
+        "linux": "Ctrl+Alt+5",
+        "win": "Ctrl+Alt+5",
+        "when": "editorTextFocus"
+      }
+    ]
+  }
+}
