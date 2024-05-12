@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand(
-    "vscode-selections-swap.swap",
+    "vscode-swap-selections.swap",
     () => {
       const editor = vscode.window.activeTextEditor;
 
