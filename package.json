@@ -1,6 +1,6 @@
 {
   "name": "vscode-swap-selections",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "displayName": "Swap Selections Text",
   "description": "This extension allows you to swap selections.",
   "main": "./out/extension.js",
