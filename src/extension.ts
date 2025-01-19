@@ -3,9 +3,8 @@ import * as vscode from "vscode";
 export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand(
     "vscode-swap-selections.swap",
-    () => {
+    async () => {
       const editor = vscode.window.activeTextEditor;
-
       if (!editor) {
         return;
       }
@@ -22,14 +21,20 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
-      const initialSelections = editor.selections;
+      const initialSelections = [...editor.selections];
 
+      // Both initial selections are empty
       const isInitialSelectionsEmpty = initialSelections.every(
         (selection) => selection.isEmpty
       );
 
+      const isOneOfSelectionsEmpty =
+        editor.selections.filter((selection) => selection.isEmpty).length === 1;
+
       if (isInitialSelectionsEmpty) {
-        editor.selections = editor.selections.map((selection) => {
+        // If both initial selections are empty
+        // We create new whole line selections
+        editor.selections = initialSelections.map((selection) => {
           return new vscode.Selection(
             selection.start.line,
             0,
@@ -39,40 +44,48 @@ export function activate(context: vscode.ExtensionContext) {
         });
       }
 
-      const selectionsWithText = editor.selections.map((selection) => {
-        return {
-          selection,
-          text: editor.document.getText(selection),
-        };
+      const [firstSel, secondSel] = editor.selections;
+
+      const firstText = editor.document.getText(firstSel);
+      const secondText = editor.document.getText(secondSel);
+
+      await editor.edit((builder) => {
+        builder.replace(firstSel, secondText);
+        builder.replace(secondSel, firstText);
       });
 
       if (isInitialSelectionsEmpty) {
+        // After swap line selections
+        // We create new character selections based on initial selections
         editor.selections = initialSelections.map((selection, index) => {
           return new vscode.Selection(
             selection.start.line,
-            initialSelections[index === 0 ? 1 : 0].active.character,
+            initialSelections[+!index].active.character,
             selection.end.line,
-            initialSelections[index === 0 ? 1 : 0].active.character
+            initialSelections[+!index].active.character
           );
         });
       }
 
-      const swappedSelections = [
-        {
-          selection: selectionsWithText[1].selection,
-          text: selectionsWithText[0].text,
-        },
-        {
-          selection: selectionsWithText[0].selection,
-          text: selectionsWithText[1].text,
-        },
-      ];
+      if (isOneOfSelectionsEmpty) {
+        // If one of initial selections is empty
+        // We create new selection based on the other one with inserted text
+        const makeNewSelection = (
+          anchorPos: vscode.Position,
+          insertedText: string
+        ) => {
+          const startOffset = editor.document.offsetAt(anchorPos);
+          const endOffset = startOffset + insertedText.length;
+          const newStart = editor.document.positionAt(startOffset);
+          const newEnd = editor.document.positionAt(endOffset);
+          return new vscode.Selection(newStart, newEnd);
+        };
 
-      editor.edit((builder) => {
-        swappedSelections.forEach(({ selection, text }) => {
-          builder.replace(selection, text);
-        });
-      });
+        const newFirstSelection = makeNewSelection(firstSel.start, secondText);
+        const newSecondSelection = makeNewSelection(secondSel.start, firstText);
+
+        editor.selections = [newFirstSelection, newSecondSelection];
+      }
     }
   );
 
